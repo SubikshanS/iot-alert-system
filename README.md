@@ -188,8 +188,8 @@ smart-fire-detection/
 
 ### Step 1: Clone Repository & Configure Credentials
 ```bash
-git clone https://github.com/your-username/smart-fire-detection.git
-cd smart-fire-detection
+git clone https://github.com/SubikshanS/iot-alert-system.git
+cd iot-alert-system
 ```
 
 Copy the credentials template:
