@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Fire, Smoke & Temperature IoT Monitoring Dashboard</title>
+    <link rel="stylesheet" href="css/style.css">
+    <!-- Chart.js via CDN for responsive real-time time-series telemetry -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="dark-theme">
+    <!-- Top Navigation & Control Bar -->
+    <header class="navbar">
+        <div class="nav-brand">
+            <span class="brand-icon">🔥</span>
+            <div>
+                <h1>Smart Fire Detection IoT Node</h1>
+                <span class="subtitle">ESP32 Safety-Critical Multi-Sensor Telemetry</span>
+            </div>
+        </div>
+
+        <div class="nav-controls">
+            <!-- Connection Mode & IP Config -->
+            <div class="connection-box">
+                <span id="connBadge" class="badge badge-sim">🟡 SIMULATION MODE</span>
+                <input type="text" id="espIpInput" placeholder="ESP32 IP (e.g. 192.168.1.105)" value="">
+                <button id="btnConnect" class="btn btn-secondary" onclick="app.connectHardware()">Connect Node</button>
+                <button id="btnToggleSim" class="btn btn-outline" onclick="app.toggleSimMode()">Use Simulation</button>
+            </div>
+
+            <!-- Theme Switcher -->
+            <button id="themeToggle" class="btn btn-icon" onclick="app.toggleTheme()" title="Toggle Theme">🌓</button>
+        </div>
+    </header>
+
+    <main class="dashboard-container">
+        <!-- 2. CURRENT ALERT STATUS BANNER (Dynamic Color & Urgency) -->
+        <section id="alertBanner" class="alert-banner alert-normal">
+            <div class="alert-content">
+                <span id="alertIcon" class="alert-symbol">🛡️</span>
+                <div>
+                    <h2 id="alertTitle">SYSTEM NOMINAL - ALL SENSORS CLEAR</h2>
+                    <p id="alertDetails">No fire, smoke, or elevated heat signatures detected in monitoring zone.</p>
+                </div>
+            </div>
+            <div class="alert-actions">
+                <button id="btnResetAlarm" class="btn btn-danger" onclick="app.resetEmergency()" style="display:none;">
+                    DISARM & RESET ALARM
+                </button>
+            </div>
+        </section>
+
+        <!-- TOP METRIC CARDS ROW -->
+        <div class="grid grid-4">
+            <!-- 1. SYSTEM OVERVIEW -->
+            <div class="card card-status">
+                <div class="card-header">
+                    <h3>1. System Overview</h3>
+                    <span id="sysStatePill" class="pill pill-success">NORMAL</span>
+                </div>
+                <div class="card-body">
+                    <div class="metric-row">
+                        <span class="label">Operating State:</span>
+                        <span id="sysStateVal" class="value">STATE_NORMAL</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="label">Active Threat:</span>
+                        <span id="sysThreatVal" class="value">THREAT_NONE</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="label">System Uptime:</span>
+                        <span id="sysUptimeVal" class="value">00:00:00</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="label">Free Heap RAM:</span>
+                        <span id="sysHeapVal" class="value">294 KB</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. TEMPERATURE MONITORING -->
+            <div class="card">
+                <div class="card-header">
+                    <h3>3. Temperature</h3>
+                    <span id="tempStatusPill" class="pill pill-success">NOMINAL</span>
+                </div>
+                <div class="card-body gauge-body">
+                    <div class="primary-metric">
+                        <span id="tempValue" class="metric-number">27.2</span>
+                        <span class="metric-unit">°C</span>
+                    </div>
+                    <div class="sub-metric">
+                        <span>Humidity: <strong id="humValue">54%</strong></span>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div id="tempBar" class="progress-bar" style="width: 27%;"></div>
+                    </div>
+                    <div class="scale-labels">
+                        <span>0°C</span>
+                        <span class="warn-marker">Warn: 45°C</span>
+                        <span>60°C</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4. SMOKE & GAS SENSOR (MQ-2) -->
+            <div class="card">
+                <div class="card-header">
+                    <h3>4. Smoke / Combustible Gas</h3>
+                    <span id="smokeStatusPill" class="pill pill-success">CLEAN</span>
+                </div>
+                <div class="card-body gauge-body">
+                    <div class="primary-metric">
+                        <span id="smokeRawValue" class="metric-number">580</span>
+                        <span class="metric-unit">ADC</span>
+                    </div>
+                    <div class="sub-metric">
+                        <span>Pre-Divider Output: <strong id="smokeVoltValue">0.78 V</strong></span>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div id="smokeBar" class="progress-bar" style="width: 14%;"></div>
+                    </div>
+                    <div class="scale-labels">
+                        <span>0 ADC</span>
+                        <span class="warn-marker">Warn: 1200</span>
+                        <span>4095 ADC</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 5. OPTICAL FLAME DETECTION -->
+            <div class="card">
+                <div class="card-header">
+                    <h3>5. Optical Flame Sensor</h3>
+                    <span id="flameStatusPill" class="pill pill-success">CLEAR</span>
+                </div>
+                <div class="card-body status-center-body">
+                    <div id="flameIcon" class="large-status-icon icon-clear">🛡️</div>
+                    <div id="flameText" class="large-status-text">NO FLAME DETECTED</div>
+                    <div class="sub-metric">
+                        <span>IR Photodiode: <strong id="flamePinState">LM393 DO High</strong></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MIDDLE ROW: SENSOR HEALTH, GPS, WIFI -->
+        <div class="grid grid-3">
+            <!-- 6. GPS LOCATION -->
+            <div class="card">
+                <div class="card-header">
+                    <h3>6. Geolocation (NEO-6M GPS)</h3>
+                    <span id="gpsFixPill" class="pill pill-success">3D FIX ACTIVE</span>
+                </div>
+                <div class="card-body">
+                    <div class="metric-row">
+                        <span class="label">Latitude:</span>
+                        <strong id="gpsLatVal">13.082700° N</strong>
+                    </div>
+                    <div class="metric-row">
+                        <span class="label">Longitude:</span>
+                        <strong id="gpsLngVal">80.270700° E</strong>
+                    </div>
+                    <div class="metric-row">
+                        <span class="label">Satellites Tracked:</span>
+                        <span id="gpsSatsVal">8 Satellites (HDOP: 0.9)</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="label">UTC Atomic Time:</span>
+                        <span id="gpsTimeVal">2026-11-01 19:45:00 UTC</span>
+                    </div>
+                    <div class="card-action-bar">
+                        <a id="gpsMapLink" href="https://maps.google.com/?q=13.082700,80.270700" target="_blank" class="btn btn-sm btn-primary">
+                            🗺️ Open in Google Maps
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 7. WI-FI CONNECTIVITY -->
+            <div class="card">
+                <div class="card-header">
+                    <h3>7. Network Connectivity</h3>
+                    <span id="wifiStatusPill" class="pill pill-success">CONNECTED</span>
+                </div>
+                <div class="card-body">
+                    <div class="metric-row">
+                        <span class="label">IP Address:</span>
+                        <strong id="wifiIpVal">192.168.1.105</strong>
+                    </div>
+                    <div class="metric-row">
+                        <span class="label">Signal Strength (RSSI):</span>
+                        <span id="wifiRssiVal">-58 dBm (Strong)</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="label">REST API Port:</span>
+                        <span>Port 80 (HTTP/JSON)</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="label">Telegram Gateway:</span>
+                        <span id="tgGatewayVal">HTTPS TLS Enabled</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 8. SENSOR HEALTH -->
+            <div class="card">
+                <div class="card-header">
+                    <h3>8. Sensor Health Diagnostics</h3>
+                    <span id="healthOverallPill" class="pill pill-success">ALL HEALTHY</span>
+                </div>
+                <div class="card-body">
+                    <ul class="health-list">
+                        <li>
+                            <span class="health-name">DHT11 Temp & Humidity:</span>
+                            <span id="healthDHT" class="badge badge-success">HEALTHY (CRC Valid)</span>
+                        </li>
+                        <li>
+                            <span class="health-name">MQ-2 Smoke/Gas Sensor:</span>
+                            <span id="healthMQ2" class="badge badge-success">HEALTHY (In Bounds)</span>
+                        </li>
+                        <li>
+                            <span class="health-name">Optical Flame Sensor:</span>
+                            <span id="healthFlame" class="badge badge-success">HEALTHY (DO Valid)</span>
+                        </li>
+                        <li>
+                            <span class="health-name">NEO-6M GPS Receiver:</span>
+                            <span id="healthGPS" class="badge badge-success">HEALTHY (UART Active)</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- 9. HISTORICAL SENSOR READINGS (Chart.js Visualization) -->
+        <section class="card chart-section">
+            <div class="card-header">
+                <div>
+                    <h3>9. Historical Sensor Telemetry Visualization</h3>
+                    <span class="subtitle">Live continuous 30-sample rolling window</span>
+                </div>
+                <div class="chart-legend-custom">
+                    <span class="legend-chip chip-temp">■ Temperature (°C)</span>
+                    <span class="legend-chip chip-smoke">■ Smoke Level (ADC)</span>
+                </div>
+            </div>
+            <div class="card-body chart-wrapper">
+                <canvas id="telemetryChart"></canvas>
+            </div>
+        </section>
+
+        <!-- 10. EMERGENCY EVENT HISTORY & SIMULATION CONTROLS -->
+        <div class="grid grid-2">
+            <!-- 10. EVENT HISTORY TABLE -->
+            <div class="card">
+                <div class="card-header">
+                    <h3>10. Emergency Event Log</h3>
+                    <button class="btn btn-sm btn-outline" onclick="app.clearEventLog()">Clear Log</button>
+                </div>
+                <div class="card-body table-responsive">
+                    <table class="event-table">
+                        <thead>
+                            <tr>
+                                <th>Timestamp</th>
+                                <th>Severity</th>
+                                <th>Event Description</th>
+                            </tr>
+                        </thead>
+                        <tbody id="eventLogBody">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- SIMULATION TEST BENCH CONTROLS -->
+            <div class="card">
+                <div class="card-header">
+                    <h3>Bench Simulation Controls</h3>
+                    <span class="badge badge-info">For Demonstration / Testing</span>
+                </div>
+                <div class="card-body">
+                    <p class="sim-note">
+                        Simulate sensor stimulus without requiring dangerous open flames or smoke exposure.
+                    </p>
+                    <div class="sim-btn-grid">
+                        <button class="btn btn-warning" onclick="app.triggerSim('smoke')">💨 Inject Smoke (Warning)</button>
+                        <button class="btn btn-danger" onclick="app.triggerSim('flame')">🔥 Optical Flame Trigger</button>
+                        <button class="btn btn-danger" onclick="app.triggerSim('dual_crit')">🚨 Dual Critical Threat</button>
+                        <button class="btn btn-dark" onclick="app.triggerSim('button')">🆘 Manual Emergency Push</button>
+                        <button class="btn btn-success" onclick="app.triggerSim('clear')">✅ Restore Normal State</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <p>IoT-Based Smart Fire, Smoke and Temperature Detection & Alert System | ESP32 Embedded Architecture</p>
+    </footer>
+
+    <script src="js/app.js"></script>
+</body>
+</html>
+

@@ -1,0 +1,37 @@
+# Python Artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+
+# PlatformIO & Arduino Build Artifacts
+.pio/
+.pioenvs/
+.piolibdeps/
+.vscode/.browse.c_cpp.db*
+.vscode/c_cpp_properties.json
+.vscode/launch.json
+.vscode/ipch/
+*.hex
+*.bin
+*.elf
+
+# Environment & Credentials (NEVER COMMIT SENSITIVE TOKENS)
+firmware/include/secrets.h
+.env
+config.local.json
+
+# Operating System & IDE
+.DS_Store
+Thumbs.db
+*.swp
+*.bak
+*~
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Node / Web dependencies (if any)
+node_modules/
+npm-debug.log*
+
