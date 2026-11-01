@@ -290,13 +290,19 @@ python tests/test_end_to_end_integration.py
 
 ---
 
-## 10. Project Photographs & Visuals Placeholder
+## 10. Hardware Wiring Diagrams & Visuals
 
-| Hardware Assembly | Normal OLED Screen | Emergency Alarm Screen |
-|:---:|:---:|:---:|
-| ![Hardware Setup](docs/images/hardware_setup.jpg) | ![OLED Normal](docs/images/oled_normal_screen.jpg) | ![OLED Critical](docs/images/oled_critical_screen.jpg) |
+### A. Vector Pin-to-Pin Breadboard Schematic
+The complete high-resolution vector schematic showing all 8 peripheral modules, exact GPIO pins, and the MQ-2 voltage divider:
 
-*(Place high-resolution photographs of your breadboard prototype in `docs/images/`).*
+![Hardware Wiring Diagram](docs/images/wiring_diagram.svg)
+
+### B. Physical 3D Breadboard Assembly Reference
+![Hardware Assembly Diagram](docs/images/hardware_wiring_photo.jpg)
+
+| Full System Overview | Detailed Breadboard Wiring |
+|:---:|:---:|
+| ![Overview](docs/images/hardware_overview.jpg) | ![Wiring Details](docs/images/hardware_wiring_photo.jpg) |
 
 ---
 

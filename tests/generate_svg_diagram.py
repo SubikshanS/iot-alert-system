@@ -1,0 +1,398 @@
+import os
+
+svg_content = '''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 980" width="100%" height="100%" style="background:#0f172a; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+  <defs>
+    <!-- Shadow filter -->
+    <filter id="cardShadow" x="-10%" y="-10%" width="125%" height="125%">
+      <feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="#000" flood-opacity="0.4"/>
+    </filter>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="4" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+    
+    <!-- Markers for wires -->
+    <marker id="dotRed" markerWidth="8" markerHeight="8" refX="4" refY="4">
+      <circle cx="4" cy="4" r="3" fill="#ef4444"/>
+    </marker>
+    <marker id="dotOrange" markerWidth="8" markerHeight="8" refX="4" refY="4">
+      <circle cx="4" cy="4" r="3" fill="#f97316"/>
+    </marker>
+    <marker id="dotBlue" markerWidth="8" markerHeight="8" refX="4" refY="4">
+      <circle cx="4" cy="4" r="3" fill="#3b82f6"/>
+    </marker>
+    <marker id="dotGreen" markerWidth="8" markerHeight="8" refX="4" refY="4">
+      <circle cx="4" cy="4" r="3" fill="#10b981"/>
+    </marker>
+  </defs>
+
+  <!-- Title & Banner -->
+  <rect x="0" y="0" width="1440" height="70" fill="#1e293b"/>
+  <text x="30" y="44" fill="#38bdf8" font-size="24" font-weight="800">ESP32 Fire, Smoke &amp; Temp Detection System</text>
+  <text x="640" y="44" fill="#94a3b8" font-size="16" font-weight="500">| Complete Hardware Wiring &amp; Breadboard Interconnect Diagram</text>
+  
+  <!-- WIRE COLOR LEGEND -->
+  <g transform="translate(1080, 15)">
+    <rect width="330" height="42" rx="6" fill="#0f172a" stroke="#334155" stroke-width="1.5"/>
+    <circle cx="20" cy="21" r="6" fill="#ef4444"/>
+    <text x="32" y="25" fill="#f8fafc" font-size="11" font-weight="600">5V</text>
+    
+    <circle cx="75" cy="21" r="6" fill="#f97316"/>
+    <text x="87" y="25" fill="#f8fafc" font-size="11" font-weight="600">3.3V</text>
+    
+    <circle cx="135" cy="21" r="6" fill="#3b82f6"/>
+    <text x="147" y="25" fill="#f8fafc" font-size="11" font-weight="600">GND</text>
+    
+    <circle cx="195" cy="21" r="6" fill="#10b981"/>
+    <text x="207" y="25" fill="#f8fafc" font-size="11" font-weight="600">Signal</text>
+    
+    <circle cx="265" cy="21" r="6" fill="#eab308"/>
+    <text x="277" y="25" fill="#f8fafc" font-size="11" font-weight="600">I2C/UART</text>
+  </g>
+
+  <!-- ========================================================================= -->
+  <!-- CENTRAL ESP32 DEVKIT MODULE -->
+  <!-- ========================================================================= -->
+  <g transform="translate(560, 200)" filter="url(#cardShadow)">
+    <!-- ESP32 Board Body -->
+    <rect width="320" height="540" rx="16" fill="#1e293b" stroke="#475569" stroke-width="2"/>
+    <!-- Metal Shield & Antenna -->
+    <rect x="50" y="30" width="220" height="130" rx="6" fill="#334155" stroke="#64748b" stroke-width="1.5"/>
+    <path d="M 90 30 L 90 15 L 230 15 L 230 30" fill="none" stroke="#eab308" stroke-width="3"/>
+    <text x="160" y="90" fill="#f8fafc" font-size="15" font-weight="800" text-anchor="middle">ESP-WROOM-32</text>
+    <text x="160" y="112" fill="#94a3b8" font-size="11" text-anchor="middle">Wi-Fi + BLE Microcontroller</text>
+    
+    <!-- USB Port -->
+    <rect x="120" y="525" width="80" height="25" rx="3" fill="#64748b" stroke="#94a3b8" stroke-width="1.5"/>
+    <text x="160" y="542" fill="#0f172a" font-size="10" font-weight="800" text-anchor="middle">USB 5V</text>
+    
+    <!-- Power LED -->
+    <circle cx="70" cy="180" r="5" fill="#ef4444" filter="url(#glow)"/>
+    <text x="82" y="184" fill="#94a3b8" font-size="9">PWR</text>
+
+    <!-- LEFT PIN HEADER (Input / ADC / Power) -->
+    <g transform="translate(10, 180)">
+      <!-- VIN (5V Rail Source) -->
+      <circle cx="10" cy="20" r="6" fill="#ef4444"/>
+      <text x="24" y="24" fill="#ef4444" font-size="13" font-weight="800">VIN (5V Rail)</text>
+      
+      <!-- GND -->
+      <circle cx="10" cy="60" r="6" fill="#3b82f6"/>
+      <text x="24" y="64" fill="#60a5fa" font-size="13" font-weight="800">GND (Common Ground)</text>
+
+      <!-- 3V3 (3.3V Rail Source) -->
+      <circle cx="10" cy="100" r="6" fill="#f97316"/>
+      <text x="24" y="104" fill="#f97316" font-size="13" font-weight="800">3V3 (3.3V Rail)</text>
+
+      <!-- GPIO 34 (MQ-2 ADC1) -->
+      <circle cx="10" cy="150" r="6" fill="#10b981"/>
+      <text x="24" y="154" fill="#34d399" font-size="12" font-weight="700">GPIO 34 (MQ-2 ADC)</text>
+
+      <!-- GPIO 4 (DHT11) -->
+      <circle cx="10" cy="200" r="6" fill="#10b981"/>
+      <text x="24" y="204" fill="#34d399" font-size="12" font-weight="700">GPIO 4 (DHT11 Data)</text>
+
+      <!-- GPIO 18 (Flame DO) -->
+      <circle cx="10" cy="250" r="6" fill="#10b981"/>
+      <text x="24" y="254" fill="#34d399" font-size="12" font-weight="700">GPIO 18 (Flame DO)</text>
+
+      <!-- GPIO 23 (Emergency Button) -->
+      <circle cx="10" cy="300" r="6" fill="#10b981"/>
+      <text x="24" y="304" fill="#34d399" font-size="12" font-weight="700">GPIO 23 (Emergency Btn)</text>
+    </g>
+
+    <!-- RIGHT PIN HEADER (UART / I2C / Outputs) -->
+    <g transform="translate(310, 180)">
+      <!-- GPIO 16 (GPS RX2) -->
+      <circle cx="-10" cy="20" r="6" fill="#eab308"/>
+      <text x="-24" y="24" fill="#facc15" font-size="12" font-weight="700" text-anchor="end">GPIO 16 (GPS RX2)</text>
+
+      <!-- GPIO 17 (GPS TX2) -->
+      <circle cx="-10" cy="60" r="6" fill="#eab308"/>
+      <text x="-24" y="64" fill="#facc15" font-size="12" font-weight="700" text-anchor="end">GPIO 17 (GPS TX2)</text>
+
+      <!-- GPIO 21 (OLED SDA) -->
+      <circle cx="-10" cy="110" r="6" fill="#38bdf8"/>
+      <text x="-24" y="114" fill="#38bdf8" font-size="12" font-weight="700" text-anchor="end">GPIO 21 (OLED SDA)</text>
+
+      <!-- GPIO 22 (OLED SCL) -->
+      <circle cx="-10" cy="150" r="6" fill="#38bdf8"/>
+      <text x="-24" y="154" fill="#38bdf8" font-size="12" font-weight="700" text-anchor="end">GPIO 22 (OLED SCL)</text>
+
+      <!-- GPIO 25 (Active Buzzer) -->
+      <circle cx="-10" cy="200" r="6" fill="#a855f7"/>
+      <text x="-24" y="204" fill="#c084fc" font-size="12" font-weight="700" text-anchor="end">GPIO 25 (Buzzer Alarm)</text>
+
+      <!-- GPIO 26 (Red Alarm LED) -->
+      <circle cx="-10" cy="250" r="6" fill="#f43f5e"/>
+      <text x="-24" y="254" fill="#fb7185" font-size="12" font-weight="700" text-anchor="end">GPIO 26 (Red Alarm LED)</text>
+
+      <!-- GPIO 27 (Green Normal LED) -->
+      <circle cx="-10" cy="300" r="6" fill="#10b981"/>
+      <text x="-24" y="304" fill="#4ade80" font-size="12" font-weight="700" text-anchor="end">GPIO 27 (Green Normal LED)</text>
+    </g>
+  </g>
+
+  <!-- ========================================================================= -->
+  <!-- COMPONENT 1: MQ-2 SMOKE/GAS SENSOR & VOLTAGE DIVIDER -->
+  <!-- ========================================================================= -->
+  <g transform="translate(50, 110)" filter="url(#cardShadow)">
+    <rect width="250" height="210" rx="10" fill="#1e293b" stroke="#475569" stroke-width="1.5"/>
+    <rect x="0" y="0" width="250" height="35" rx="10" fill="#334155"/>
+    <text x="15" y="24" fill="#f8fafc" font-size="14" font-weight="700">1. MQ-2 Smoke &amp; Gas Sensor</text>
+
+    <!-- Mesh sensor circle -->
+    <circle cx="70" cy="100" r="32" fill="#475569" stroke="#94a3b8" stroke-dasharray="3,3" stroke-width="2"/>
+    <circle cx="70" cy="100" r="24" fill="#334155"/>
+    <text x="70" y="105" fill="#f8fafc" font-size="11" font-weight="700" text-anchor="middle">SnO2</text>
+
+    <!-- Pins -->
+    <g transform="translate(140, 55)">
+      <circle cx="10" cy="15" r="5" fill="#ef4444"/>
+      <text x="25" y="19" fill="#ef4444" font-size="12" font-weight="700">VCC (5V)</text>
+
+      <circle cx="10" cy="45" r="5" fill="#3b82f6"/>
+      <text x="25" y="49" fill="#60a5fa" font-size="12" font-weight="700">GND</text>
+
+      <circle cx="10" cy="75" r="5" fill="#10b981"/>
+      <text x="25" y="79" fill="#34d399" font-size="12" font-weight="700">AOUT (0-5V)</text>
+
+      <circle cx="10" cy="105" r="5" fill="#64748b"/>
+      <text x="25" y="109" fill="#94a3b8" font-size="11">DOUT (N/C)</text>
+    </g>
+
+    <!-- Divider Sub-Box -->
+    <g transform="translate(15, 145)">
+      <rect width="220" height="52" rx="4" fill="#0f172a" stroke="#22c55e" stroke-width="1"/>
+      <text x="10" y="18" fill="#4ade80" font-size="10" font-weight="800">VOLTAGE DIVIDER PROTECTION:</text>
+      <text x="10" y="32" fill="#cbd5e1" font-size="9.5">R1 (2.2kΩ) between AOUT &amp; GPIO 34</text>
+      <text x="10" y="45" fill="#cbd5e1" font-size="9.5">R2 (3.3kΩ) between GPIO 34 &amp; GND (3V Max)</text>
+    </g>
+  </g>
+
+  <!-- ========================================================================= -->
+  <!-- COMPONENT 2: DHT11 TEMP & HUMIDITY -->
+  <!-- ========================================================================= -->
+  <g transform="translate(50, 360)" filter="url(#cardShadow)">
+    <rect width="250" height="150" rx="10" fill="#1e293b" stroke="#475569" stroke-width="1.5"/>
+    <rect x="0" y="0" width="250" height="35" rx="10" fill="#334155"/>
+    <text x="15" y="24" fill="#f8fafc" font-size="14" font-weight="700">2. DHT11 Temp &amp; Humidity</text>
+
+    <!-- Blue Grid Housing -->
+    <rect x="25" y="55" width="55" height="75" rx="6" fill="#0284c7" stroke="#38bdf8" stroke-width="2"/>
+    <line x1="35" y1="65" x2="70" y2="65" stroke="#bae6fd" stroke-width="2"/>
+    <line x1="35" y1="80" x2="70" y2="80" stroke="#bae6fd" stroke-width="2"/>
+    <line x1="35" y1="95" x2="70" y2="95" stroke="#bae6fd" stroke-width="2"/>
+    <line x1="35" y1="110" x2="70" y2="110" stroke="#bae6fd" stroke-width="2"/>
+
+    <!-- Pins -->
+    <g transform="translate(115, 60)">
+      <circle cx="10" cy="15" r="5" fill="#f97316"/>
+      <text x="25" y="19" fill="#f97316" font-size="12" font-weight="700">VCC (3.3V)</text>
+
+      <circle cx="10" cy="45" r="5" fill="#10b981"/>
+      <text x="25" y="49" fill="#34d399" font-size="12" font-weight="700">DATA (GPIO 4)</text>
+
+      <circle cx="10" cy="75" r="5" fill="#3b82f6"/>
+      <text x="25" y="79" fill="#60a5fa" font-size="12" font-weight="700">GND</text>
+    </g>
+  </g>
+
+  <!-- ========================================================================= -->
+  <!-- COMPONENT 3: OPTICAL FLAME SENSOR -->
+  <!-- ========================================================================= -->
+  <g transform="translate(50, 545)" filter="url(#cardShadow)">
+    <rect width="250" height="150" rx="10" fill="#1e293b" stroke="#475569" stroke-width="1.5"/>
+    <rect x="0" y="0" width="250" height="35" rx="10" fill="#334155"/>
+    <text x="15" y="24" fill="#f8fafc" font-size="14" font-weight="700">3. Optical Flame Sensor</text>
+
+    <!-- Black photodiode LED shape -->
+    <ellipse cx="50" cy="95" rx="16" ry="24" fill="#09090b" stroke="#71717a" stroke-width="2"/>
+    <circle cx="50" cy="85" r="6" fill="#27272a"/>
+    <text x="50" y="135" fill="#a1a1aa" font-size="10" font-weight="700" text-anchor="middle">760-1100nm IR</text>
+
+    <!-- Pins -->
+    <g transform="translate(115, 60)">
+      <circle cx="10" cy="15" r="5" fill="#f97316"/>
+      <text x="25" y="19" fill="#f97316" font-size="12" font-weight="700">VCC (3.3V)</text>
+
+      <circle cx="10" cy="45" r="5" fill="#3b82f6"/>
+      <text x="25" y="49" fill="#60a5fa" font-size="12" font-weight="700">GND</text>
+
+      <circle cx="10" cy="75" r="5" fill="#10b981"/>
+      <text x="25" y="79" fill="#34d399" font-size="12" font-weight="700">DO (GPIO 18)</text>
+    </g>
+  </g>
+
+  <!-- ========================================================================= -->
+  <!-- COMPONENT 4: EMERGENCY PUSH BUTTON -->
+  <!-- ========================================================================= -->
+  <g transform="translate(50, 730)" filter="url(#cardShadow)">
+    <rect width="250" height="130" rx="10" fill="#1e293b" stroke="#475569" stroke-width="1.5"/>
+    <rect x="0" y="0" width="250" height="35" rx="10" fill="#334155"/>
+    <text x="15" y="24" fill="#f8fafc" font-size="14" font-weight="700">4. Emergency Button</text>
+
+    <!-- Push Button Body -->
+    <rect x="35" y="55" width="50" height="50" rx="6" fill="#dc2626" stroke="#f87171" stroke-width="2"/>
+    <circle cx="60" cy="80" r="14" fill="#b91c1c"/>
+
+    <!-- Pins -->
+    <g transform="translate(115, 60)">
+      <circle cx="10" cy="20" r="5" fill="#10b981"/>
+      <text x="25" y="24" fill="#34d399" font-size="12" font-weight="700">Leg A (GPIO 23)</text>
+
+      <circle cx="10" cy="50" r="5" fill="#3b82f6"/>
+      <text x="25" y="54" fill="#60a5fa" font-size="12" font-weight="700">Leg B (GND Rail)</text>
+    </g>
+  </g>
+
+  <!-- ========================================================================= -->
+  <!-- COMPONENT 5: NEO-6M GPS MODULE -->
+  <!-- ========================================================================= -->
+  <g transform="translate(1140, 110)" filter="url(#cardShadow)">
+    <rect width="250" height="190" rx="10" fill="#1e293b" stroke="#475569" stroke-width="1.5"/>
+    <rect x="0" y="0" width="250" height="35" rx="10" fill="#334155"/>
+    <text x="15" y="24" fill="#f8fafc" font-size="14" font-weight="700">5. NEO-6M GPS Module</text>
+
+    <!-- Ceramic Patch Antenna -->
+    <rect x="25" y="60" width="60" height="60" rx="4" fill="#a1a1aa" stroke="#d4d4d8" stroke-width="2"/>
+    <circle cx="55" cy="90" r="5" fill="#71717a"/>
+    <text x="55" y="135" fill="#94a3b8" font-size="9" text-anchor="middle">Antenna</text>
+
+    <!-- Pins -->
+    <g transform="translate(115, 55)">
+      <circle cx="10" cy="15" r="5" fill="#ef4444"/>
+      <text x="25" y="19" fill="#ef4444" font-size="12" font-weight="700">VCC (5V)</text>
+
+      <circle cx="10" cy="45" r="5" fill="#3b82f6"/>
+      <text x="25" y="49" fill="#60a5fa" font-size="12" font-weight="700">GND</text>
+
+      <circle cx="10" cy="75" r="5" fill="#eab308"/>
+      <text x="25" y="79" fill="#facc15" font-size="12" font-weight="700">TX &#8594; GPIO 16</text>
+
+      <circle cx="10" cy="105" r="5" fill="#eab308"/>
+      <text x="25" y="109" fill="#facc15" font-size="12" font-weight="700">RX &#8592; GPIO 17</text>
+    </g>
+  </g>
+
+  <!-- ========================================================================= -->
+  <!-- COMPONENT 6: 0.96" I2C OLED DISPLAY -->
+  <!-- ========================================================================= -->
+  <g transform="translate(1140, 330)" filter="url(#cardShadow)">
+    <rect width="250" height="180" rx="10" fill="#1e293b" stroke="#475569" stroke-width="1.5"/>
+    <rect x="0" y="0" width="250" height="35" rx="10" fill="#334155"/>
+    <text x="15" y="24" fill="#f8fafc" font-size="14" font-weight="700">6. 0.96" OLED (SSD1306)</text>
+
+    <!-- OLED Screen Area -->
+    <rect x="25" y="55" width="80" height="50" rx="4" fill="#020617" stroke="#38bdf8" stroke-width="1.5"/>
+    <text x="65" y="75" fill="#38bdf8" font-size="9" text-anchor="middle">FIRE SYSTEM</text>
+    <text x="65" y="90" fill="#4ade80" font-size="8" text-anchor="middle">STATUS: OK</text>
+
+    <!-- Pins -->
+    <g transform="translate(125, 50)">
+      <circle cx="10" cy="15" r="5" fill="#3b82f6"/>
+      <text x="25" y="19" fill="#60a5fa" font-size="12" font-weight="700">GND</text>
+
+      <circle cx="10" cy="40" r="5" fill="#f97316"/>
+      <text x="25" y="44" fill="#f97316" font-size="12" font-weight="700">VCC (3.3V)</text>
+
+      <circle cx="10" cy="65" r="5" fill="#38bdf8"/>
+      <text x="25" y="69" fill="#38bdf8" font-size="12" font-weight="700">SCL (GPIO 22)</text>
+
+      <circle cx="10" cy="90" r="5" fill="#38bdf8"/>
+      <text x="25" y="94" fill="#38bdf8" font-size="12" font-weight="700">SDA (GPIO 21)</text>
+    </g>
+  </g>
+
+  <!-- ========================================================================= -->
+  <!-- COMPONENT 7: ACTIVE BUZZER -->
+  <!-- ========================================================================= -->
+  <g transform="translate(1140, 540)" filter="url(#cardShadow)">
+    <rect width="250" height="150" rx="10" fill="#1e293b" stroke="#475569" stroke-width="1.5"/>
+    <rect x="0" y="0" width="250" height="35" rx="10" fill="#334155"/>
+    <text x="15" y="24" fill="#f8fafc" font-size="14" font-weight="700">7. Active Buzzer Alarm</text>
+
+    <!-- Buzzer Round Cylinder -->
+    <circle cx="55" cy="90" r="28" fill="#09090b" stroke="#64748b" stroke-width="2"/>
+    <circle cx="55" cy="90" r="8" fill="#27272a"/>
+    <text x="75" y="70" fill="#ef4444" font-size="16" font-weight="900">+</text>
+
+    <!-- Pins -->
+    <g transform="translate(115, 60)">
+      <circle cx="10" cy="15" r="5" fill="#a855f7"/>
+      <text x="25" y="19" fill="#c084fc" font-size="12" font-weight="700">Signal (GPIO 25)</text>
+
+      <circle cx="10" cy="45" r="5" fill="#f97316"/>
+      <text x="25" y="49" fill="#f97316" font-size="12" font-weight="700">VCC (3.3V / 5V)</text>
+
+      <circle cx="10" cy="75" r="5" fill="#3b82f6"/>
+      <text x="25" y="79" fill="#60a5fa" font-size="12" font-weight="700">GND</text>
+    </g>
+  </g>
+
+  <!-- ========================================================================= -->
+  <!-- COMPONENT 8: STATUS LEDS (RED & GREEN) -->
+  <!-- ========================================================================= -->
+  <g transform="translate(1140, 720)" filter="url(#cardShadow)">
+    <rect width="250" height="150" rx="10" fill="#1e293b" stroke="#475569" stroke-width="1.5"/>
+    <rect x="0" y="0" width="250" height="35" rx="10" fill="#334155"/>
+    <text x="15" y="24" fill="#f8fafc" font-size="14" font-weight="700">8. Status Indicator LEDs</text>
+
+    <!-- Red LED -->
+    <g transform="translate(35, 55)">
+      <circle cx="15" cy="15" r="10" fill="#ef4444" filter="url(#glow)"/>
+      <rect x="13" y="25" width="4" height="20" fill="#94a3b8"/>
+      <text x="15" y="60" fill="#f87171" font-size="10" font-weight="700" text-anchor="middle">Red (GPIO 26)</text>
+      <text x="15" y="72" fill="#cbd5e1" font-size="9" text-anchor="middle">+ 330Ω to GND</text>
+    </g>
+
+    <!-- Green LED -->
+    <g transform="translate(135, 55)">
+      <circle cx="15" cy="15" r="10" fill="#10b981" filter="url(#glow)"/>
+      <rect x="13" y="25" width="4" height="20" fill="#94a3b8"/>
+      <text x="15" y="60" fill="#4ade80" font-size="10" font-weight="700" text-anchor="middle">Green (GPIO 27)</text>
+      <text x="15" y="72" fill="#cbd5e1" font-size="9" text-anchor="middle">+ 330Ω to GND</text>
+    </g>
+  </g>
+
+  <!-- ========================================================================= -->
+  <!-- CONNECTION BUSSES (Clean routed traces between modules) -->
+  <!-- ========================================================================= -->
+  <!-- MQ-2 to ESP32 GPIO 34 -->
+  <path d="M 235 185 L 380 185 L 380 350 L 570 350" fill="none" stroke="#10b981" stroke-width="2.5" stroke-dasharray="6,4"/>
+  
+  <!-- DHT11 to ESP32 GPIO 4 -->
+  <path d="M 215 425 L 420 425 L 420 400 L 570 400" fill="none" stroke="#10b981" stroke-width="2.5"/>
+
+  <!-- Flame DO to ESP32 GPIO 18 -->
+  <path d="M 215 640 L 450 640 L 450 450 L 570 450" fill="none" stroke="#10b981" stroke-width="2.5"/>
+
+  <!-- Emergency Btn to ESP32 GPIO 23 -->
+  <path d="M 215 800 L 480 800 L 480 500 L 570 500" fill="none" stroke="#10b981" stroke-width="2.5"/>
+
+  <!-- GPS to ESP32 (GPIO 16/17) -->
+  <path d="M 1255 185 L 1020 185 L 1020 220 L 870 220" fill="none" stroke="#eab308" stroke-width="2.5"/>
+  <path d="M 1255 215 L 1040 215 L 1040 260 L 870 260" fill="none" stroke="#eab308" stroke-width="2.5"/>
+
+  <!-- OLED to ESP32 (GPIO 21/22) -->
+  <path d="M 1265 420 L 1020 420 L 1020 310 L 870 310" fill="none" stroke="#38bdf8" stroke-width="2.5"/>
+  <path d="M 1265 445 L 1040 445 L 1040 350 L 870 350" fill="none" stroke="#38bdf8" stroke-width="2.5"/>
+
+  <!-- Buzzer to ESP32 GPIO 25 -->
+  <path d="M 1255 615 L 1020 615 L 1020 400 L 870 400" fill="none" stroke="#c084fc" stroke-width="2.5"/>
+
+  <!-- LEDs to ESP32 (GPIO 26/27) -->
+  <path d="M 1190 770 L 1040 770 L 1040 450 L 870 450" fill="none" stroke="#fb7185" stroke-width="2.5"/>
+  <path d="M 1290 770 L 1060 770 L 1060 500 L 870 500" fill="none" stroke="#4ade80" stroke-width="2.5"/>
+
+  <!-- Bottom Helper Note -->
+  <rect x="420" y="890" width="600" height="45" rx="8" fill="#1e293b" stroke="#334155" stroke-width="1.5"/>
+  <text x="720" y="918" fill="#38bdf8" font-size="13" font-weight="700" text-anchor="middle">&#128161; Tip: All components share the Blue Common Ground (GND) rail connected to ESP32 GND.</text>
+</svg>
+'''
+
+output_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'docs', 'images', 'wiring_diagram.svg')
+with open(output_path, 'w', encoding='utf-8') as f:
+    f.write(svg_content)
+
+print(f"Generated clean SVG wiring diagram at: {output_path}")
